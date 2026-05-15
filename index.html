@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartTank — Water Monitoring System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+      </span>
+      <span class="brand-name">SmartTank<span class="brand-v">v2.0</span></span>
+    </div>
+    <div class="topbar-center">
+      <span class="live-dot" id="liveDot"></span>
+      <span class="live-label" id="liveLabel">LIVE MONITORING</span>
+      <span class="topbar-time" id="topbarTime">--:--:--</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon" id="pauseBtn" title="Pause / Resume">
+        <svg id="pauseIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+        </svg>
+        <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:none">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="csvBtn" title="Export CSV">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+      <div class="overall-badge" id="overallBadge">ALL NORMAL</div>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <main class="main-grid">
+
+    <!-- LEFT COLUMN -->
+    <section class="col-left">
+
+      <!-- Tank Visualizer Card -->
+      <div class="card tank-card">
+        <div class="card-header">
+          <span class="card-title">Tank Level</span>
+          <span class="card-tag" id="levelTag">NORMAL</span>
+        </div>
+        <div class="tank-scene">
+          <div class="tank-body">
+            <div class="tank-fill" id="tankFill">
+              <div class="tank-waves">
+                <svg class="wave" viewBox="0 0 200 20" preserveAspectRatio="none">
+                  <path id="wavePath" d="M0,10 C40,0 80,20 120,10 C160,0 200,20 200,10 L200,20 L0,20 Z"/>
+                </svg>
+              </div>
+              <span class="tank-pct" id="tankPct">--%</span>
+            </div>
+            <!-- Level markers -->
+            <div class="level-marker" style="bottom:90%"><span>90%</span></div>
+            <div class="level-marker danger-marker" style="bottom:20%"><span>20%</span></div>
+          </div>
+          <div class="tank-stats">
+            <div class="tstat">
+              <span class="tstat-label">Status</span>
+              <span class="tstat-val" id="tankStatus">—</span>
+            </div>
+            <div class="tstat">
+              <span class="tstat-label">Flow Rate</span>
+              <span class="tstat-val" id="flowVal">—</span>
+            </div>
+            <div class="tstat">
+              <span class="tstat-label">Pressure</span>
+              <span class="tstat-val" id="pressVal">—</span>
+            </div>
+            <div class="tstat motor-stat">
+              <span class="tstat-label">Motor Pump</span>
+              <span class="motor-status" id="motorBadge">OFF</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensor Health Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Sensor Health</span>
+          <span class="card-tag" id="healthTag">CHECKING...</span>
+        </div>
+        <div class="health-grid" id="healthGrid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CENTER COLUMN -->
+    <section class="col-center">
+
+      <!-- Quality Metrics Row -->
+      <div class="metrics-row">
+        <div class="metric-card" id="mcPH">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">pH Level</span>
+            <span class="metric-value" id="phVal">—</span>
+            <span class="metric-unit">pH</span>
+          </div>
+          <div class="metric-bar-wrap"><div class="metric-bar" id="phBar"></div></div>
+          <span class="metric-status" id="phStatus">—</span>
+        </div>
+
+        <div class="metric-card" id="mcTurb">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Turbidity</span>
+            <span class="metric-value" id="turbVal">—</span>
+            <span class="metric-unit">NTU</span>
+          </div>
+          <div class="metric-bar-wrap"><div class="metric-bar" id="turbBar"></div></div>
+          <span class="metric-status" id="turbStatus">—</span>
+        </div>
+
+        <div class="metric-card" id="mcTemp">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Temperature</span>
+            <span class="metric-value" id="tempVal">—</span>
+            <span class="metric-unit">°C</span>
+          </div>
+          <div class="metric-bar-wrap"><div class="metric-bar" id="tempBar"></div></div>
+          <span class="metric-status" id="tempStatus">—</span>
+        </div>
+
+        <div class="metric-card" id="mcBatt">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v3"/><rect x="5" y="10" width="7" height="5" rx="1" fill="currentColor"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Battery</span>
+            <span class="metric-value" id="battVal">—</span>
+            <span class="metric-unit">%</span>
+          </div>
+          <div class="metric-bar-wrap"><div class="metric-bar" id="battBar"></div></div>
+          <span class="metric-status" id="battStatus">—</span>
+        </div>
+      </div>
+
+      <!-- History Chart Card -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <span class="card-title">Level History</span>
+          <div class="chart-legend">
+            <span class="leg-dot" style="background:var(--teal)"></span><span>Water Level %</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="histChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="card stats-card">
+        <div class="card-header">
+          <span class="card-title">Session Statistics</span>
+          <span class="card-tag" id="readingsTag">0 readings</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Avg Level</span>
+            <span class="stat-val" id="avgLevel">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Max Level</span>
+            <span class="stat-val" id="maxLevel">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Min Level</span>
+            <span class="stat-val" id="minLevel">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Temp</span>
+            <span class="stat-val" id="avgTemp">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg pH</span>
+            <span class="stat-val" id="avgPH">—</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Total Alerts</span>
+            <span class="stat-val" id="totalAlerts">0</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN -->
+    <section class="col-right">
+
+      <!-- Alerts Card -->
+      <div class="card alerts-card">
+        <div class="card-header">
+          <span class="card-title">Active Alerts</span>
+          <span class="alert-count" id="alertCount">0</span>
+        </div>
+        <div class="alerts-list" id="alertsList">
+          <div class="alert-ok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            All parameters within normal range
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Log Card -->
+      <div class="card log-card">
+        <div class="card-header">
+          <span class="card-title">Event Log</span>
+          <button class="btn-clear" id="clearLog">Clear</button>
+        </div>
+        <div class="log-list" id="logList">
+          <div class="log-empty">No events yet…</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
